@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+body {
+  @apply bg-[#0B0F19] min-h-screen w-full text-white;
+}
+
+
+
+
