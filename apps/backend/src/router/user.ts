@@ -7,26 +7,19 @@ const router: any = Router();
 const typedRouter = router as any;
 
 typedRouter.post("/signup", async (req: Request, res: Response) => {
-
     const data = req.body;
     const username = data.username;
     const password = data.password;
-
     const existingUser = await prismaClient.user.findFirst({
         where: {
           username: username,
         },
     });
-
-    if (existingUser) {
-        res.json({
-          message: "user already exists",
-        });
+    if (existingUser) { res.json({ message: "user already exists" });
         return;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await prismaClient.user.create({
         data: {
             username: username ,
@@ -35,20 +28,9 @@ typedRouter.post("/signup", async (req: Request, res: Response) => {
         }
     })
 
-    if (!user) {
-        res.json({
-          message: "internal error creating user",
-        });
-    }
+    if (!user) { res.json({ message: "internal error creating user" }) };
 
-
-
-    res.json({
-        message: "user created successfully",
-        user: user,
-    });
-
-
+    res.json({ message: "user created successfully" });
 });
 
 

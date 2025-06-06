@@ -81,7 +81,7 @@ const modifyPrompt = async (basePrompt: string, style: string) => {
       },
       {
         headers: {
-          Authorization: `Bearer ${OPENROUTER_API_KEY}`, // move secret to env
+          Authorization: `Bearer ${OPENROUTER_API_KEY}`,
           "Content-Type": "application/json",
         },
       }
@@ -89,6 +89,7 @@ const modifyPrompt = async (basePrompt: string, style: string) => {
 
     const content = (response.data as any)?.choices?.[0]?.message?.content;
     if (!content) throw new Error("No content in response");
+    
 
     return { prompt: content, error: null };
   } catch (error: any) {
@@ -116,7 +117,7 @@ typedRouter.post("/", async (req: Request, res: Response) => {
     if (error) return res.status(500).json({ error });
 
     if (style === "anime") {
-      const baseModel = "3dAnimationDiffusion_v10.safetensors [31829c378d]";
+      const baseModel = "divineanimemix_V2.safetensors [21e8ae2ff3]";
       const loras = [
         { name: "more_details", strength: 0.3 },
         { name: "晖映(BG+LGHT)", strength: 0.6 },
