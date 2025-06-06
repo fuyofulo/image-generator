@@ -114,6 +114,9 @@ typedRouter.post("/", async (req: Request, res: Response) => {
       basePrompt,
       style
     );
+
+    console.log(`${modifiedPrompt}`);
+
     if (error) return res.status(500).json({ error });
 
     if (style === "anime") {
@@ -266,4 +269,4 @@ Your output might be:
 
 "1boy, blue jacket, red hat, anime, expressive eyes, dynamic lighting, detailed line art, urban backdrop."
 
-Now, please generate an optimized prompt for the given user input. You dont need to add any other text than the prompt as it will be used as a prompt for a text-to-image model and anything else will be ignored.`;
+Now, please generate an optimized prompt for the given user input. You dont need to add any other text than the prompt as it will be used as a prompt for a text-to-image model and anything else will be ignored. Do not add any lora tags yourself please.`;
