@@ -101,7 +101,7 @@ const modifyPrompt = async (basePrompt: string, style: string) => {
   }
 };
 
-// Express POST handler
+
 typedRouter.post("/", async (req: Request, res: Response) => {
   try {
     const { prompt: basePrompt, style } = req.body;
