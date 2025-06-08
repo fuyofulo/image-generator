@@ -1,0 +1,5 @@
+start docker using this command:
+docker run --name major-project -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=mydb -p 5432:5432 -d postgres
+
+in .env file add this:
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/mydb"
