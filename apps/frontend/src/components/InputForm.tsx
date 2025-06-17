@@ -1,14 +1,66 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { BASE_API_URL } from "../config";
 
+interface Style {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export default function InputForm() {
   const [inputPrompt, setInputPrompt] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState("2d-anime");
+  const [availableStyles, setAvailableStyles] = useState<Style[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState("");
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+
+  // Fetch available styles on component mount
+  useEffect(() => {
+    const fetchStyles = async () => {
+      try {
+        const response = await fetch(`${BASE_API_URL}/generate/styles`);
+        if (response.ok) {
+          const data = await response.json();
+          setAvailableStyles(data.styles);
+        } else {
+          // Fallback to default styles if API fails
+          setAvailableStyles([
+            {
+              id: "2d-anime",
+              name: "2D Anime",
+              description: "2D anime style generation",
+            },
+            {
+              id: "3d-anime",
+              name: "3D Anime",
+              description: "3D anime style generation",
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch styles:", error);
+        // Fallback to default styles
+        setAvailableStyles([
+          {
+            id: "2d-anime",
+            name: "2D Anime",
+            description: "2D anime style generation",
+          },
+          {
+            id: "3d-anime",
+            name: "3D Anime",
+            description: "3D anime style generation",
+          },
+        ]);
+      }
+    };
+
+    fetchStyles();
+  }, []);
 
   // Function to handle image generation
   const handleGenerate = async () => {
@@ -19,7 +71,9 @@ export default function InputForm() {
     setGeneratedImage(null);
 
     const startTime = Date.now();
-    console.log(`🚀 Starting image generation for prompt: "${inputPrompt}"`);
+    console.log(
+      `🚀 Starting image generation for prompt: "${inputPrompt}" with style: "${selectedStyle}"`
+    );
 
     try {
       const response = await fetch(`${BASE_API_URL}/generate`, {
@@ -29,7 +83,7 @@ export default function InputForm() {
         },
         body: JSON.stringify({
           prompt: inputPrompt,
-          style: "anime", // Currently only supporting anime style
+          style: selectedStyle,
         }),
       });
 
@@ -55,6 +109,7 @@ export default function InputForm() {
             steps: infoObj.steps,
             cfgScale: infoObj.cfg_scale,
             sampler: infoObj.sampler_name,
+            style: data.style,
           });
         } catch (e) {
           console.log("Could not parse image info");
@@ -95,6 +150,7 @@ export default function InputForm() {
         detail: {
           image: data.imagePath || (data.images && data.images[0]) || null,
           isPath: !!data.imagePath,
+          style: data.style,
         },
       });
       window.dispatchEvent(generatedImageEvent);
@@ -108,6 +164,29 @@ export default function InputForm() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-5 rounded-xl border border-gray-700 bg-black">
+      {/* Style selection */}
+      <div className="mb-5">
+        <div className="mb-2">
+          <span className="text-white text-sm px-2">Choose Style</span>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {availableStyles.map((style) => (
+            <button
+              key={style.id}
+              onClick={() => setSelectedStyle(style.id)}
+              className={`p-3 rounded-lg border text-left transition-all ${
+                selectedStyle === style.id
+                  ? "border-blue-500 bg-blue-500/20 text-blue-300"
+                  : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+              }`}
+            >
+              <div className="font-medium">{style.name}</div>
+              <div className="text-xs opacity-70 mt-1">{style.description}</div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Input prompt section */}
       <div className="mb-5">
         <div className="mb-2">
@@ -120,6 +199,7 @@ export default function InputForm() {
             value={inputPrompt}
             onChange={(e) => setInputPrompt(e.target.value)}
             className="w-full bg-transparent outline-none resize-none text-white h-20 text-base"
+            placeholder="Describe the image you want to generate..."
           />
         </div>
       </div>
@@ -130,7 +210,9 @@ export default function InputForm() {
         onClick={handleGenerate}
         disabled={isGenerating || !inputPrompt.trim()}
       >
-        {isGenerating ? "Generating..." : "Generate"}
+        {isGenerating
+          ? "Generating..."
+          : `Generate ${availableStyles.find((s) => s.id === selectedStyle)?.name || "Image"}`}
       </button>
 
       {/* Error message */}
@@ -161,4 +243,3 @@ export default function InputForm() {
     </div>
   );
 }
-
